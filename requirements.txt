@@ -1,0 +1,9 @@
+fastapi[all]>=0.115.0,<0.116.0
+langchain
+langgraph
+langchain-openai
+openai
+tiktoken
+weaviate-client
+uvicorn
+gunicorn
