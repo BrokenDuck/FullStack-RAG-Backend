@@ -21,12 +21,13 @@ class Settings(BaseSettings):
     weaviate_api_key: str
     command_r_url: str
     command_r_api_key: str
-    command_r_plus_url: str
-    command_r_plus_api_key: str
-    embed_english_url: str
-    embed_english_api_key: str
-    rerank_english_url: str
-    rerank_english_api_key: str
+    command_r_plus_url: str = ''
+    command_r_plus_api_key: str = ''
+    embed_english_url: str = ''
+    embed_english_api_key: str = ''
+    rerank_english_url: str = ''
+    rerank_english_api_key: str = ''
+    allow_origins: str = '*'
 
     model_config = SettingsConfigDict(env_file="../.env")
 

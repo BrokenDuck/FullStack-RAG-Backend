@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 import logging
 
@@ -10,10 +11,19 @@ from .config import (
     CohereClients,
     WeaviateAsyncClient,
     WeaviateClient,
+    get_settings
 )
 from .models import Question, Answer
 from .upload import aupload_documents, upload_documents
 from .query import aquery_rag, astream_rag, query_rag, stream_rag
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=get_settings().allow_origins,
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
 
 @app.get("/")

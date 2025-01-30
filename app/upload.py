@@ -50,7 +50,6 @@ async def aprocess_file(
             input_type="search_document",
             embedding_types=["float"],
         )
-        print("Embedding async to cohere!")
 
         # Upload documents to the database
         document_objs = list()
@@ -109,7 +108,6 @@ async def aupload_documents(
         for file in files
     ]
     responses = await asyncio.gather(*tasks)
-    print("Uploading files!")
     filenames = [files[i].filename for i in range(len(files)) if responses[i] is True]
     await weaviate_async_client.close()
     return filenames

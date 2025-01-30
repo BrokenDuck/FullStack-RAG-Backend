@@ -9,7 +9,7 @@ query_generation_tool = ToolV2(
                 "queries": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "a list of queries for similarity search in a database.",
+                    "description": "a list of queries for a text and similarity search in a database.",
                 }
             },
             "required": ["queries"],

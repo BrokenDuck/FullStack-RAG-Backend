@@ -1,5 +1,5 @@
-from .prompts import query_generation_instruction
-from .tools import query_generation_tool
+from .statics.prompts import query_generation_instruction
+from .statics.tools import query_generation_tool
 
 import cohere
 from cohere import UserChatMessageV2, SystemChatMessageV2, Document, CitationOptions
