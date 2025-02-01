@@ -56,7 +56,7 @@ A [docker](https://www.docker.com/) instalation.
 
 4. Define the object collection in the weaviate database. You should look at the database notebook at `notebooks/database.ipynb`.
 
-5. You are all set. To see a full description of the backend go to `http://127.0.0.1:8000/docs`.
+5. You are all set. To see a full description of the backend api, including endpoint request and response formats, go to `http://127.0.0.1:8000/docs`. A full openapi specification (that can be imported into Postman) can be found in `specification.json`.
 
 ## Developing the backend
 
@@ -71,6 +71,8 @@ The backend has the following file structure:
 ├── statics
 │   ├── prompts.py
 │   └── tools.py
+├── tests
+│   └── test_main.py
 └── upload.py
 ```
 
@@ -82,12 +84,19 @@ Here is a brief description of every file and it's purpose:
 - `upload.py`: defines the python async functions to chunk pdfs, embed the chunks and upload them to the database
 - `static/prompts.py`: defines the prompts for the chat completion model (can be fine tuned for prompt engineering)
 - `static/tools.py`: defines the tools for the advanced embeddings retrieval models (only required for advanced retrieval)
+- `tests/test_main.py`: defines a basic test to check the root api endpoint
 
 ### FastAPI REST API
 
 After modifying the files, run the FastAPI in development mode:
 ```bash
 fastapi dev app/main.py
+```
+
+To run the test, first install pytest and then run the tests
+```bash
+pip install pytest httpx pytest-asyncio
+pytest app/tests/
 ```
 
 ### Weaviate Database
