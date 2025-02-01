@@ -26,7 +26,11 @@ async def process_file(
 ):
     logging.info('Extracting markdown...')
     # Parse pdf, also extracting tables
-    md_text = await asyncify(pymupdf4llm.to_markdown)(
+    # For some reason, this code doesn't work :(
+    # md_text = await asyncify(pymupdf4llm.to_markdown)(
+    #     pymupdf.open(stream=file.file.read(), filetype="pdf")
+    # )
+    md_text = pymupdf4llm.to_markdown(
         pymupdf.open(stream=file.file.read(), filetype="pdf")
     )
 

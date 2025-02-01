@@ -4,3 +4,4 @@ langchain_text_splitters
 pymupdf4llm
 cohere
 weaviate-client
+asyncer
