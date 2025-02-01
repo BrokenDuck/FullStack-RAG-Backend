@@ -26,6 +26,6 @@ class AnswerChunk(BaseModel):
     title: Optional[str] = Field(
         description="The title of the citation if the type of the chunk is 'citation'"
     )
-    text: str = Field(
+    text: Optional[str] = Field(
         description="The chunk content. A part of the answer if chunk type is 'response-chunk'. The citation content if chunk type is 'citation'"
     )

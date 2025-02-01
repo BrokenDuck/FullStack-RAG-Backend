@@ -1,28 +1,30 @@
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-
+from contextlib import asynccontextmanager
 import logging
 
-app = FastAPI()
-
-from .config import (
-    CohereAsyncClients,
-    CohereClients,
-    WeaviateAsyncClient,
-    WeaviateClient,
-    get_settings
-)
+from .config import cohere_async_clients, weaviate_async_client, settings
 from .models import Question, Answer
-from .upload import aupload_documents, upload_documents
-from .query import aquery_rag, astream_rag, query_rag, stream_rag
+from .upload import upload_documents
+from .query import query_rag, stream_rag
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    await weaviate_async_client.connect()
+    yield
+    await weaviate_async_client.close()
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=get_settings().allow_origins,
+    allow_origins=[settings.allow_origins],
     allow_credentials=True,
-    allow_methods=['*'],
-    allow_headers=['*'],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -32,17 +34,15 @@ async def read_root():
     return {"Hello": "World"}
 
 
-@app.post("/astream")
-async def astream(
-    question: Question,
-    cohere_async_clients: CohereAsyncClients,
-    weaviate_async_client: WeaviateAsyncClient,
-) -> StreamingResponse:
-    logging.debug(f"POST request received at /astream...")
+@app.post("/stream")
+async def stream(question: Question) -> StreamingResponse:
+    logging.debug(f"POST request received at /stream...")
+    
+    if not await weaviate_async_client.is_ready():
+        raise HTTPException(status_code=503, detail="Weaviate is not ready.")
 
-    # Stream the respones
     return StreamingResponse(
-        astream_rag(
+        stream_rag(
             question.question,
             question.rerank,
             cohere_async_clients,
@@ -52,63 +52,28 @@ async def astream(
     )
 
 
-@app.post("/aquery")
-async def aquery(
-    question: Question,
-    cohere_async_clients: CohereAsyncClients,
-    weaviate_async_client: WeaviateAsyncClient,
-) -> Answer:
-    logging.debug(f"POST request received at /aquery...")
+@app.post("/query")
+async def query(question: Question) -> Answer:
+    logging.debug(f"POST request received at /query...")
+    
+    if not await weaviate_async_client.is_ready():
+        raise HTTPException(status_code=503, detail="Weaviate is not ready.")
 
     # Return the full response
-    response = await aquery_rag(
+    response = await query_rag(
         question.question, question.rerank, cohere_async_clients, weaviate_async_client
     )
     return response
 
 
-@app.post("/stream")
-def stream(
-    question: Question, cohere_clients: CohereClients, weaviate_client: WeaviateClient
-) -> StreamingResponse:
-    logging.debug(f"POST request received at /stream...")
-
-    # Stream the respones
-    return StreamingResponse(
-        stream_rag(question.question, question.rerank, cohere_clients, weaviate_client),
-        media_type="text/event-stream",
-    )
-
-
-@app.post("/query")
-def query(
-    question: Question, cohere_clients: CohereClients, weaviate_client: WeaviateClient
-) -> Answer:
-    logging.debug(f"POST request received at /query...")
-
-    # Return the full response
-    return query_rag(
-        question.question, question.rerank, cohere_clients, weaviate_client
-    )
-
-
-@app.post("/auploadfiles")
-async def auploadfiles(
-    files: list[UploadFile],
-    cohere_async_clients: CohereAsyncClients,
-    weaviate_async_client: WeaviateAsyncClient,
-):
-    logging.debug("POST request received at /auploadfiles...")
-
-    await aupload_documents(files, cohere_async_clients, weaviate_async_client)
-
-
 @app.post("/uploadfiles")
-def uploadfiles(
-    files: list[UploadFile],
-    cohere_clients: CohereClients,
-    weaviate_client: WeaviateClient,
-):
+async def uploadfiles(files: list[UploadFile]):
     logging.debug("POST request received at /uploadfiles...")
+    
+    if not await weaviate_async_client.is_ready():
+        raise HTTPException(status_code=503, detail="Weaviate is not ready.")
 
-    upload_documents(files, cohere_clients, weaviate_client)
+    errored_files = await upload_documents(files, cohere_async_clients, weaviate_async_client)
+    
+    if len(errored_files) != 0:
+        return HTTPException(status_code=500, detail=f"File Upload failed for files: {", ".join(errored_files)}")

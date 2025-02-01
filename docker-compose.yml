@@ -34,9 +34,7 @@ services:
   backend:
     image: backend-image
     ports:
-      - 80:80
-    environment:
-      WEAVIATE_URL: "http://weaviate:8080"
+      - 8000:8000
     networks:
       - backend-network
     depends_on:
@@ -46,5 +44,5 @@ volumes:
   weaviate_data:
 
 networks:
-  weaviate-network:
+  backend-network:
     driver: bridge
