@@ -12,7 +12,7 @@ import httpx
 from typing import AsyncGenerator
 from .models import AnswerChunk, Answer
 
-
+# Advanced document retrieval
 async def get_documents_rerank(
     question: str,
     cohere_async_clients: dict[str, cohere.AsyncClientV2],
@@ -80,6 +80,7 @@ async def get_documents_rerank(
     return documents
 
 
+# Basic document retrieval
 async def get_documents(
     question: str,
     cohere_async_clients: dict[str, cohere.AsyncClientV2],

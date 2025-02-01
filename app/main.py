@@ -3,6 +3,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
+import json
 
 from .config import cohere_async_clients, weaviate_async_client, settings
 from .models import Question, Answer
@@ -21,7 +22,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.allow_origins],
+    allow_origins=json.loads(settings.allow_origins),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

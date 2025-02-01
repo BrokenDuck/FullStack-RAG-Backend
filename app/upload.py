@@ -8,7 +8,7 @@ from langchain_text_splitters import (
 import cohere
 import weaviate
 import weaviate.classes as wvc
-
+from asyncer import asyncify
 import asyncio
 import logging
 
@@ -26,7 +26,7 @@ async def process_file(
 ):
     logging.info('Extracting markdown...')
     # Parse pdf, also extracting tables
-    md_text = pymupdf4llm.to_markdown(
+    md_text = await asyncify(pymupdf4llm.to_markdown)(
         pymupdf.open(stream=file.file.read(), filetype="pdf")
     )
 
@@ -95,8 +95,6 @@ async def upload_documents(
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
     )
-
-    # Context to automatically open and close the connection to the database
 
     tasks = [
         process_file(
